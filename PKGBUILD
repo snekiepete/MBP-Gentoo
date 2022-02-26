@@ -6,8 +6,9 @@
 pkgbase=linux-t2
 pkgver=5.16.11
 pkgrel=1
+extra_ver=".a"
 pkgdesc='Linux kernel for T2 Macs'
-_srctag=v${pkgver}-${pkgrel}
+_srctag=v${pkgver}$extra_ver-${pkgrel}
 url="https://github.com/t2linux/kernel/commits/arch-t2-$_srctag"
 arch=(x86_64)
 license=(GPL2)
