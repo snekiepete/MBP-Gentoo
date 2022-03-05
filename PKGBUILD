@@ -4,11 +4,10 @@
 # Contributor: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-t2
-pkgver=5.16.11
+pkgver=5.16.12
 pkgrel=1
-extra_ver=".a"
 pkgdesc='Linux kernel for T2 Macs'
-_srctag=v${pkgver}$extra_ver-${pkgrel}
+_srctag=v${pkgver}-${pkgrel}
 url="https://github.com/t2linux/kernel/commits/arch-t2-$_srctag"
 arch=(x86_64)
 license=(GPL2)
