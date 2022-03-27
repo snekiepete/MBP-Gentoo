@@ -4,7 +4,7 @@
 # Contributor: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-t2
-pkgver=5.16.14
+pkgver=5.16.17
 pkgrel=1
 pkgdesc='Linux kernel for T2 Macs'
 _srctag=v${pkgver}-${pkgrel}
@@ -28,10 +28,6 @@ source=(
   apple-ibridge::git+https://github.com/Redecorating/apple-ib-drv#commit=467df9b11cb55456f0365f40dd11c9e666623bf3
   1001-Put-apple-bce-and-apple-ibridge-in-drivers-staging.patch
   1002-add-modalias-to-apple-bce.patch
-
-  # Apple SMC ACPI support
-  3007-applesmc-Add-iMacPro-to-applesmc_whitelist.patch
-  
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
@@ -226,6 +222,5 @@ sha256sums=('SKIP'
             'SKIP'
             'SKIP'
             'b7c987889d92a48d638d5258842b10f6c856e57f29ad23475aa507c7b4ad5710'
-            'a3a43feaffccbcd119f4a1b4e1299ef07ae36ef9bffc17767bf10e447fa02a2a'
-            'd4ca5a01da5468a1d2957b8eb4a819e1b867a3bcd1cd47389d7c9ac9154b5430')
+            'a3a43feaffccbcd119f4a1b4e1299ef07ae36ef9bffc17767bf10e447fa02a2a')
 # vim:set ts=8 sts=2 sw=2 et:
