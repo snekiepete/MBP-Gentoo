@@ -4,7 +4,7 @@
 # Contributor: Jan Alexander Steffens (heftig) <jan.steffens@gmail.com>
 
 pkgbase=linux-t2
-pkgver=5.16.17
+pkgver=5.16.18
 pkgrel=1
 pkgdesc='Linux kernel for T2 Macs'
 _srctag=v${pkgver}-${pkgrel}
