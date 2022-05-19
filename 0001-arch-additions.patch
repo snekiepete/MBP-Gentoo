@@ -1,4 +1,4 @@
-From af1be991f71b28e22fd079554c4f88e1911836a7 Mon Sep 17 00:00:00 2001
+From e9ff9783ac7b7111552f54608d730df42e5e99d2 Mon Sep 17 00:00:00 2001
 From: "Jan Alexander Steffens (heftig)" <jan.steffens@gmail.com>
 Date: Mon, 16 Sep 2019 04:53:20 +0200
 Subject: [PATCH 1/8] ZEN: Add sysctl and CONFIG to disallow unprivileged
@@ -150,7 +150,7 @@ index 5481ba44a8d684..423ab2563ad757 100644
  static DEFINE_MUTEX(userns_state_mutex);
  
 
-From 448472bd240fb5a6c164cc60fd975f13785bfb08 Mon Sep 17 00:00:00 2001
+From 00903d94f8ef47f1da2f87c31e32753c36a1911a Mon Sep 17 00:00:00 2001
 From: "Jason A. Donenfeld" <Jason@zx2c4.com>
 Date: Wed, 23 Mar 2022 23:09:30 -0600
 Subject: [PATCH 2/8] random: treat bootloader trust toggle the same way as cpu
@@ -242,7 +242,7 @@ index 3404a91edf2929..19bf14e253f70c 100644
  	else
  		add_device_randomness(buf, size);
 
-From 928032927d445c27a84a5698d14bcfc0d5d27af9 Mon Sep 17 00:00:00 2001
+From 725479ba08eb2f1da6eec1b23852c1c70e002ed1 Mon Sep 17 00:00:00 2001
 From: Frederic Weisbecker <frederic@kernel.org>
 Date: Wed, 2 Feb 2022 01:01:07 +0100
 Subject: [PATCH 3/8] tick: Detect and fix jiffies update stall
@@ -326,7 +326,7 @@ index d952ae39342363..504649513399ba 100644
  
  extern struct tick_sched *tick_get_tick_sched(int cpu);
 
-From 2085cf328b0c587bcfee52b1cb56a6b27c3249e3 Mon Sep 17 00:00:00 2001
+From f70a9a8cdb921524c618ea0e703856c96f9fec40 Mon Sep 17 00:00:00 2001
 From: Frederic Weisbecker <frederic@kernel.org>
 Date: Tue, 8 Feb 2022 17:16:33 +0100
 Subject: [PATCH 4/8] tick/rcu: Remove obsolete rcu_needs_cpu() parameters
@@ -425,7 +425,7 @@ index 0578c9301b1794..4c62fa0f70f1c6 100644
  
  	/*
 
-From 3decaa4b2af3d7365aa32411c6351626825ce397 Mon Sep 17 00:00:00 2001
+From e4bc9f7cc85243a32f100925bde5f48c23bfe1de Mon Sep 17 00:00:00 2001
 From: Frederic Weisbecker <frederic@kernel.org>
 Date: Tue, 8 Feb 2022 17:16:34 +0100
 Subject: [PATCH 5/8] tick/rcu: Stop allowing RCU_SOFTIRQ in idle
@@ -542,7 +542,7 @@ index 4c62fa0f70f1c6..3506f6ed790c05 100644
  	if (tick_nohz_full_enabled()) {
  		/*
 
-From dfa7dabce4f075d5883f2b95ef925b6edc10ca29 Mon Sep 17 00:00:00 2001
+From 8c66e21dcb22e21cca0c1d765a9305ab0bad9855 Mon Sep 17 00:00:00 2001
 From: Frederic Weisbecker <frederic@kernel.org>
 Date: Tue, 8 Feb 2022 17:16:35 +0100
 Subject: [PATCH 6/8] lib/irq_poll: Declare IRQ_POLL softirq vector as
@@ -595,7 +595,7 @@ index 9613326d2f8af1..f40754caaefa43 100644
  /* map softirq index to softirq name. update 'softirq_to_name' in
   * kernel/softirq.c when adding a new softirq.
 
-From 70cd65db4081b480c5978d5bb60d681e784472b2 Mon Sep 17 00:00:00 2001
+From 2753466eb2227d33f26b10a3b65924c1b94217c7 Mon Sep 17 00:00:00 2001
 From: Olga Kornievskaia <kolga@netapp.com>
 Date: Wed, 16 Mar 2022 18:24:26 -0400
 Subject: [PATCH 7/8] NFSv4.1 provide mount option to toggle trunking discovery
@@ -674,23 +674,23 @@ index ca0959e51e817c..b0e3fd550122c4 100644
  	unsigned int		fattr_valid;	/* Valid attributes */
  	unsigned int		caps;		/* server capabilities */
 
-From 8ced1563b2814be6a629cd69f65fa7ea6b5066ff Mon Sep 17 00:00:00 2001
+From c3292a89a2b8e3d3be2e2a3340e64cab80f58b66 Mon Sep 17 00:00:00 2001
 From: "Jan Alexander Steffens (heftig)" <heftig@archlinux.org>
-Date: Thu, 12 May 2022 20:06:15 +0200
-Subject: [PATCH 8/8] Arch Linux kernel v5.17.7-arch1
+Date: Mon, 16 May 2022 22:44:40 +0200
+Subject: [PATCH 8/8] Arch Linux kernel v5.17.8-arch1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index ce65b393a2b490..5a647174b4daf4 100644
+index 3cf179812f0f9b..944b2333a169af 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 5
  PATCHLEVEL = 17
- SUBLEVEL = 7
+ SUBLEVEL = 8
 -EXTRAVERSION =
 +EXTRAVERSION = -arch1
  NAME = Superb Owl
