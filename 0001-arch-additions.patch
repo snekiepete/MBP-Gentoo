@@ -1,7 +1,7 @@
-From e9ff9783ac7b7111552f54608d730df42e5e99d2 Mon Sep 17 00:00:00 2001
+From 6b212353b9dd9da3c9ff4272ca951d97fb6b10b4 Mon Sep 17 00:00:00 2001
 From: "Jan Alexander Steffens (heftig)" <jan.steffens@gmail.com>
 Date: Mon, 16 Sep 2019 04:53:20 +0200
-Subject: [PATCH 1/8] ZEN: Add sysctl and CONFIG to disallow unprivileged
+Subject: [PATCH 1/2] ZEN: Add sysctl and CONFIG to disallow unprivileged
  CLONE_NEWUSER
 
 Our default behavior continues to match the vanilla kernel.
@@ -36,10 +36,10 @@ index 33a4240e6a6f17..82213f9c4c17fb 100644
  {
  	return &init_user_ns;
 diff --git a/init/Kconfig b/init/Kconfig
-index e9119bf54b1f32..a1a5a68aea0708 100644
+index ddcbefe535e9e7..f05715cf89afa6 100644
 --- a/init/Kconfig
 +++ b/init/Kconfig
-@@ -1231,6 +1231,22 @@ config USER_NS
+@@ -1235,6 +1235,22 @@ config USER_NS
  
  	  If unsure, say N.
  
@@ -63,12 +63,12 @@ index e9119bf54b1f32..a1a5a68aea0708 100644
  	bool "PID Namespaces"
  	default y
 diff --git a/kernel/fork.c b/kernel/fork.c
-index f1e89007f22889..49144b49a3d128 100644
+index 35a3beff140b6d..b013ab5ee88fe3 100644
 --- a/kernel/fork.c
 +++ b/kernel/fork.c
-@@ -98,6 +98,10 @@
- #include <linux/io_uring.h>
+@@ -99,6 +99,10 @@
  #include <linux/bpf.h>
+ #include <linux/sched/mm.h>
  
 +#ifdef CONFIG_USER_NS
 +#include <linux/user_namespace.h>
@@ -77,7 +77,7 @@ index f1e89007f22889..49144b49a3d128 100644
  #include <asm/pgalloc.h>
  #include <linux/uaccess.h>
  #include <asm/mmu_context.h>
-@@ -1922,6 +1926,10 @@ static __latent_entropy struct task_struct *copy_process(
+@@ -1992,6 +1996,10 @@ static __latent_entropy struct task_struct *copy_process(
  	if ((clone_flags & (CLONE_NEWUSER|CLONE_FS)) == (CLONE_NEWUSER|CLONE_FS))
  		return ERR_PTR(-EINVAL);
  
@@ -88,7 +88,7 @@ index f1e89007f22889..49144b49a3d128 100644
  	/*
  	 * Thread groups must share signals as well, and detached threads
  	 * can only be started up within the thread group.
-@@ -3036,6 +3044,12 @@ int ksys_unshare(unsigned long unshare_flags)
+@@ -3110,6 +3118,12 @@ int ksys_unshare(unsigned long unshare_flags)
  	if (unshare_flags & CLONE_NEWNS)
  		unshare_flags |= CLONE_FS;
  
@@ -102,7 +102,7 @@ index f1e89007f22889..49144b49a3d128 100644
  	if (err)
  		goto bad_unshare_out;
 diff --git a/kernel/sysctl.c b/kernel/sysctl.c
-index 730ab56d9e92e6..6cf4e5c36ec925 100644
+index 830aaf8ca08ee0..af4c0806bd8e84 100644
 --- a/kernel/sysctl.c
 +++ b/kernel/sysctl.c
 @@ -91,6 +91,9 @@
@@ -115,7 +115,7 @@ index 730ab56d9e92e6..6cf4e5c36ec925 100644
  
  #if defined(CONFIG_SYSCTL)
  
-@@ -1814,6 +1817,15 @@ static struct ctl_table kern_table[] = {
+@@ -1803,6 +1806,15 @@ static struct ctl_table kern_table[] = {
  		.mode		= 0644,
  		.proc_handler	= proc_dointvec,
  	},
@@ -150,547 +150,23 @@ index 5481ba44a8d684..423ab2563ad757 100644
  static DEFINE_MUTEX(userns_state_mutex);
  
 
-From 00903d94f8ef47f1da2f87c31e32753c36a1911a Mon Sep 17 00:00:00 2001
-From: "Jason A. Donenfeld" <Jason@zx2c4.com>
-Date: Wed, 23 Mar 2022 23:09:30 -0600
-Subject: [PATCH 2/8] random: treat bootloader trust toggle the same way as cpu
- trust toggle
-
-If CONFIG_RANDOM_TRUST_CPU is set, the RNG initializes using RDRAND.
-But, the user can disable (or enable) this behavior by setting
-`random.trust_cpu=0/1` on the kernel command line. This allows system
-builders to do reasonable things while avoiding howls from tinfoil
-hatters. (Or vice versa.)
-
-CONFIG_RANDOM_TRUST_BOOTLOADER is basically the same thing, but regards
-the seed passed via EFI or device tree, which might come from RDRAND or
-a TPM or somewhere else. In order to allow distros to more easily enable
-this while avoiding those same howls (or vice versa), this commit adds
-the corresponding `random.trust_bootloader=0/1` toggle.
-
-Cc: Theodore Ts'o <tytso@mit.edu>
-Cc: Graham Christensen <graham@grahamc.com>
-Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
-Reviewed-by: Dominik Brodowski <linux@dominikbrodowski.net>
-Link: https://github.com/NixOS/nixpkgs/pull/165355
-Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
----
- Documentation/admin-guide/kernel-parameters.txt | 6 ++++++
- drivers/char/Kconfig                            | 3 ++-
- drivers/char/random.c                           | 8 +++++++-
- 3 files changed, 15 insertions(+), 2 deletions(-)
-
-diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 59f881f3677939..bdc733c2561d11 100644
---- a/Documentation/admin-guide/kernel-parameters.txt
-+++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -4355,6 +4355,12 @@
- 			fully seed the kernel's CRNG. Default is controlled
- 			by CONFIG_RANDOM_TRUST_CPU.
- 
-+	random.trust_bootloader={on,off}
-+			[KNL] Enable or disable trusting the use of the
-+			a seed passed by the bootloader (if available) to
-+			fully seed the kernel's CRNG. Default is controlled
-+			by CONFIG_RANDOM_TRUST_BOOTLOADER.
-+
- 	randomize_kstack_offset=
- 			[KNL] Enable or disable kernel stack offset
- 			randomization, which provides roughly 5 bits of
-diff --git a/drivers/char/Kconfig b/drivers/char/Kconfig
-index 740811893c5705..55f48375e3fe54 100644
---- a/drivers/char/Kconfig
-+++ b/drivers/char/Kconfig
-@@ -449,6 +449,7 @@ config RANDOM_TRUST_BOOTLOADER
- 	device randomness. Say Y here to assume the entropy provided by the
- 	booloader is trustworthy so it will be added to the kernel's entropy
- 	pool. Otherwise, say N here so it will be regarded as device input that
--	only mixes the entropy pool.
-+	only mixes the entropy pool. This can also be configured at boot with
-+	"random.trust_bootloader=on/off".
- 
- endmenu
-diff --git a/drivers/char/random.c b/drivers/char/random.c
-index 3404a91edf2929..19bf14e253f70c 100644
---- a/drivers/char/random.c
-+++ b/drivers/char/random.c
-@@ -738,11 +738,17 @@ static void invalidate_batched_entropy(void);
- static void numa_crng_init(void);
- 
- static bool trust_cpu __ro_after_init = IS_ENABLED(CONFIG_RANDOM_TRUST_CPU);
-+static bool trust_bootloader __ro_after_init = IS_ENABLED(CONFIG_RANDOM_TRUST_BOOTLOADER);
- static int __init parse_trust_cpu(char *arg)
- {
- 	return kstrtobool(arg, &trust_cpu);
- }
-+static int __init parse_trust_bootloader(char *arg)
-+{
-+	return kstrtobool(arg, &trust_bootloader);
-+}
- early_param("random.trust_cpu", parse_trust_cpu);
-+early_param("random.trust_bootloader", parse_trust_bootloader);
- 
- static bool crng_init_try_arch(struct crng_state *crng)
- {
-@@ -2229,7 +2235,7 @@ EXPORT_SYMBOL_GPL(add_hwgenerator_randomness);
-  */
- void add_bootloader_randomness(const void *buf, unsigned int size)
- {
--	if (IS_ENABLED(CONFIG_RANDOM_TRUST_BOOTLOADER))
-+	if (trust_bootloader)
- 		add_hwgenerator_randomness(buf, size, size * 8);
- 	else
- 		add_device_randomness(buf, size);
-
-From 725479ba08eb2f1da6eec1b23852c1c70e002ed1 Mon Sep 17 00:00:00 2001
-From: Frederic Weisbecker <frederic@kernel.org>
-Date: Wed, 2 Feb 2022 01:01:07 +0100
-Subject: [PATCH 3/8] tick: Detect and fix jiffies update stall
-
-On some rare cases, the timekeeper CPU may be delaying its jiffies
-update duty for a while. Known causes include:
-
-* The timekeeper is waiting on stop_machine in a MULTI_STOP_DISABLE_IRQ
-  or MULTI_STOP_RUN state. Disabled interrupts prevent from timekeeping
-  updates while waiting for the target CPU to complete its
-  stop_machine() callback.
-
-* The timekeeper vcpu has VMEXIT'ed for a long while due to some overload
-  on the host.
-
-Detect and fix these situations with emergency timekeeping catchups.
-
-Original-patch-by: Paul E. McKenney <paulmck@kernel.org>
-Signed-off-by: Frederic Weisbecker <frederic@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
----
- kernel/time/tick-sched.c | 17 +++++++++++++++++
- kernel/time/tick-sched.h |  4 ++++
- 2 files changed, 21 insertions(+)
-
-diff --git a/kernel/time/tick-sched.c b/kernel/time/tick-sched.c
-index 5e80ee44c32a2a..0578c9301b1794 100644
---- a/kernel/time/tick-sched.c
-+++ b/kernel/time/tick-sched.c
-@@ -169,6 +169,8 @@ static ktime_t tick_init_jiffy_update(void)
- 	return period;
- }
- 
-+#define MAX_STALLED_JIFFIES 5
-+
- static void tick_sched_do_timer(struct tick_sched *ts, ktime_t now)
- {
- 	int cpu = smp_processor_id();
-@@ -196,6 +198,21 @@ static void tick_sched_do_timer(struct tick_sched *ts, ktime_t now)
- 	if (tick_do_timer_cpu == cpu)
- 		tick_do_update_jiffies64(now);
- 
-+	/*
-+	 * If jiffies update stalled for too long (timekeeper in stop_machine()
-+	 * or VMEXIT'ed for several msecs), force an update.
-+	 */
-+	if (ts->last_tick_jiffies != jiffies) {
-+		ts->stalled_jiffies = 0;
-+		ts->last_tick_jiffies = READ_ONCE(jiffies);
-+	} else {
-+		if (++ts->stalled_jiffies == MAX_STALLED_JIFFIES) {
-+			tick_do_update_jiffies64(now);
-+			ts->stalled_jiffies = 0;
-+			ts->last_tick_jiffies = READ_ONCE(jiffies);
-+		}
-+	}
-+
- 	if (ts->inidle)
- 		ts->got_idle_tick = 1;
- }
-diff --git a/kernel/time/tick-sched.h b/kernel/time/tick-sched.h
-index d952ae39342363..504649513399ba 100644
---- a/kernel/time/tick-sched.h
-+++ b/kernel/time/tick-sched.h
-@@ -49,6 +49,8 @@ enum tick_nohz_mode {
-  * @timer_expires_base:	Base time clock monotonic for @timer_expires
-  * @next_timer:		Expiry time of next expiring timer for debugging purpose only
-  * @tick_dep_mask:	Tick dependency mask - is set, if someone needs the tick
-+ * @last_tick_jiffies:	Value of jiffies seen on last tick
-+ * @stalled_jiffies:	Number of stalled jiffies detected across ticks
-  */
- struct tick_sched {
- 	struct hrtimer			sched_timer;
-@@ -77,6 +79,8 @@ struct tick_sched {
- 	u64				next_timer;
- 	ktime_t				idle_expires;
- 	atomic_t			tick_dep_mask;
-+	unsigned long			last_tick_jiffies;
-+	unsigned int			stalled_jiffies;
- };
- 
- extern struct tick_sched *tick_get_tick_sched(int cpu);
-
-From f70a9a8cdb921524c618ea0e703856c96f9fec40 Mon Sep 17 00:00:00 2001
-From: Frederic Weisbecker <frederic@kernel.org>
-Date: Tue, 8 Feb 2022 17:16:33 +0100
-Subject: [PATCH 4/8] tick/rcu: Remove obsolete rcu_needs_cpu() parameters
-
-With the removal of CONFIG_RCU_FAST_NO_HZ, the parameters in
-rcu_needs_cpu() are not necessary anymore. Simply remove them.
-
-Signed-off-by: Frederic Weisbecker <frederic@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Paul E. McKenney <paulmck@kernel.org>
-Cc: Paul Menzel <pmenzel@molgen.mpg.de>
----
- include/linux/rcutiny.h  |  3 +--
- include/linux/rcutree.h  |  2 +-
- kernel/rcu/tree.c        |  3 +--
- kernel/time/tick-sched.c | 10 ++++------
- 4 files changed, 7 insertions(+), 11 deletions(-)
-
-diff --git a/include/linux/rcutiny.h b/include/linux/rcutiny.h
-index 858f4d429946d3..5fed476f977f63 100644
---- a/include/linux/rcutiny.h
-+++ b/include/linux/rcutiny.h
-@@ -64,9 +64,8 @@ static inline void rcu_softirq_qs(void)
- 		rcu_tasks_qs(current, (preempt)); \
- 	} while (0)
- 
--static inline int rcu_needs_cpu(u64 basemono, u64 *nextevt)
-+static inline int rcu_needs_cpu(void)
- {
--	*nextevt = KTIME_MAX;
- 	return 0;
- }
- 
-diff --git a/include/linux/rcutree.h b/include/linux/rcutree.h
-index 53209d66940010..6cc91291d07829 100644
---- a/include/linux/rcutree.h
-+++ b/include/linux/rcutree.h
-@@ -19,7 +19,7 @@
- 
- void rcu_softirq_qs(void);
- void rcu_note_context_switch(bool preempt);
--int rcu_needs_cpu(u64 basem, u64 *nextevt);
-+int rcu_needs_cpu(void);
- void rcu_cpu_stall_reset(void);
- 
- /*
-diff --git a/kernel/rcu/tree.c b/kernel/rcu/tree.c
-index 73a4c9d07b8651..5dae0da879ae29 100644
---- a/kernel/rcu/tree.c
-+++ b/kernel/rcu/tree.c
-@@ -1086,9 +1086,8 @@ void rcu_irq_enter_irqson(void)
-  * Just check whether or not this CPU has non-offloaded RCU callbacks
-  * queued.
-  */
--int rcu_needs_cpu(u64 basemono, u64 *nextevt)
-+int rcu_needs_cpu(void)
- {
--	*nextevt = KTIME_MAX;
- 	return !rcu_segcblist_empty(&this_cpu_ptr(&rcu_data)->cblist) &&
- 		!rcu_rdp_is_offloaded(this_cpu_ptr(&rcu_data));
- }
-diff --git a/kernel/time/tick-sched.c b/kernel/time/tick-sched.c
-index 0578c9301b1794..4c62fa0f70f1c6 100644
---- a/kernel/time/tick-sched.c
-+++ b/kernel/time/tick-sched.c
-@@ -785,7 +785,7 @@ static inline bool local_timer_softirq_pending(void)
- 
- static ktime_t tick_nohz_next_event(struct tick_sched *ts, int cpu)
- {
--	u64 basemono, next_tick, next_tmr, next_rcu, delta, expires;
-+	u64 basemono, next_tick, delta, expires;
- 	unsigned long basejiff;
- 	unsigned int seq;
- 
-@@ -808,7 +808,7 @@ static ktime_t tick_nohz_next_event(struct tick_sched *ts, int cpu)
- 	 * minimal delta which brings us back to this place
- 	 * immediately. Lather, rinse and repeat...
- 	 */
--	if (rcu_needs_cpu(basemono, &next_rcu) || arch_needs_cpu() ||
-+	if (rcu_needs_cpu() || arch_needs_cpu() ||
- 	    irq_work_needs_cpu() || local_timer_softirq_pending()) {
- 		next_tick = basemono + TICK_NSEC;
- 	} else {
-@@ -819,10 +819,8 @@ static ktime_t tick_nohz_next_event(struct tick_sched *ts, int cpu)
- 		 * disabled this also looks at the next expiring
- 		 * hrtimer.
- 		 */
--		next_tmr = get_next_timer_interrupt(basejiff, basemono);
--		ts->next_timer = next_tmr;
--		/* Take the next rcu event into account */
--		next_tick = next_rcu < next_tmr ? next_rcu : next_tmr;
-+		next_tick = get_next_timer_interrupt(basejiff, basemono);
-+		ts->next_timer = next_tick;
- 	}
- 
- 	/*
-
-From e4bc9f7cc85243a32f100925bde5f48c23bfe1de Mon Sep 17 00:00:00 2001
-From: Frederic Weisbecker <frederic@kernel.org>
-Date: Tue, 8 Feb 2022 17:16:34 +0100
-Subject: [PATCH 5/8] tick/rcu: Stop allowing RCU_SOFTIRQ in idle
-
-RCU_SOFTIRQ used to be special in that it could be raised on purpose
-within the idle path to prevent from stopping the tick. Some code still
-prevents from unnecessary warnings related to this specific behaviour
-while entering in dynticks-idle mode.
-
-However the nohz layout has changed quite a bit in ten years, and the
-removal of CONFIG_RCU_FAST_NO_HZ has been the final straw to this
-safe-conduct. Now the RCU_SOFTIRQ vector is expected to be raised from
-sane places.
-
-A remaining corner case is admitted though when the vector is invoked
-in fragile hotplug path.
-
-Signed-off-by: Frederic Weisbecker <frederic@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Paul E. McKenney <paulmck@kernel.org>
-Cc: Paul Menzel <pmenzel@molgen.mpg.de>
----
- include/linux/interrupt.h |  8 ++++++-
- kernel/time/tick-sched.c  | 50 +++++++++++++++++++++++++++++++--------
- 2 files changed, 47 insertions(+), 11 deletions(-)
-
-diff --git a/include/linux/interrupt.h b/include/linux/interrupt.h
-index 9367f1cb2e3c4b..9613326d2f8af1 100644
---- a/include/linux/interrupt.h
-+++ b/include/linux/interrupt.h
-@@ -579,7 +579,13 @@ enum
- 	NR_SOFTIRQS
- };
- 
--#define SOFTIRQ_STOP_IDLE_MASK (~(1 << RCU_SOFTIRQ))
-+/*
-+ * Ignoring the RCU vector after ksoftirqd is parked is fine
-+ * because:
-+ * 	1) rcutree_migrate_callbacks() takes care of the queue.
-+ * 	2) rcu_report_dead() reports the final quiescent states.
-+ */
-+#define SOFTIRQ_HOTPLUG_SAFE_MASK (BIT(RCU_SOFTIRQ))
- 
- /* map softirq index to softirq name. update 'softirq_to_name' in
-  * kernel/softirq.c when adding a new softirq.
-diff --git a/kernel/time/tick-sched.c b/kernel/time/tick-sched.c
-index 4c62fa0f70f1c6..3506f6ed790c05 100644
---- a/kernel/time/tick-sched.c
-+++ b/kernel/time/tick-sched.c
-@@ -999,6 +999,45 @@ static void tick_nohz_full_update_tick(struct tick_sched *ts)
- 	__tick_nohz_full_update_tick(ts, ktime_get());
- }
- 
-+/*
-+ * A pending softirq outside an IRQ (or softirq disabled section) context
-+ * should be waiting for ksoftirqd to handle it. Therefore we shouldn't
-+ * reach here due to the need_resched() early check in can_stop_idle_tick().
-+ *
-+ * However if we are between CPUHP_AP_SMPBOOT_THREADS and CPU_TEARDOWN_CPU on the
-+ * cpu_down() process, softirqs can still be raised while ksoftirqd is parked,
-+ * triggering the below since wakep_softirqd() is ignored.
-+ *
-+ */
-+static bool report_idle_softirq(void)
-+{
-+	static int ratelimit;
-+	unsigned int pending = local_softirq_pending();
-+
-+	if (likely(!pending))
-+		return false;
-+
-+	/* Some softirqs claim to be safe against hotplug and ksoftirqd parking */
-+	if (!cpu_active(smp_processor_id())) {
-+		pending &= ~SOFTIRQ_HOTPLUG_SAFE_MASK;
-+		if (!pending)
-+			return false;
-+	}
-+
-+	if (ratelimit < 10)
-+		return false;
-+
-+	/* On RT, softirqs handling may be waiting on some lock */
-+	if (!local_bh_blocked())
-+		return false;
-+
-+	pr_warn("NOHZ tick-stop error: local softirq work is pending, handler #%02x!!!\n",
-+		pending);
-+	ratelimit++;
-+
-+	return true;
-+}
-+
- static bool can_stop_idle_tick(int cpu, struct tick_sched *ts)
- {
- 	/*
-@@ -1025,17 +1064,8 @@ static bool can_stop_idle_tick(int cpu, struct tick_sched *ts)
- 	if (need_resched())
- 		return false;
- 
--	if (unlikely(local_softirq_pending())) {
--		static int ratelimit;
--
--		if (ratelimit < 10 && !local_bh_blocked() &&
--		    (local_softirq_pending() & SOFTIRQ_STOP_IDLE_MASK)) {
--			pr_warn("NOHZ tick-stop error: Non-RCU local softirq work is pending, handler #%02x!!!\n",
--				(unsigned int) local_softirq_pending());
--			ratelimit++;
--		}
-+	if (unlikely(report_idle_softirq()))
- 		return false;
--	}
- 
- 	if (tick_nohz_full_enabled()) {
- 		/*
-
-From 8c66e21dcb22e21cca0c1d765a9305ab0bad9855 Mon Sep 17 00:00:00 2001
-From: Frederic Weisbecker <frederic@kernel.org>
-Date: Tue, 8 Feb 2022 17:16:35 +0100
-Subject: [PATCH 6/8] lib/irq_poll: Declare IRQ_POLL softirq vector as
- ksoftirqd-parking safe
-
-The following warning may appear while setting a CPU down:
-
-	NOHZ tick-stop error: Non-RCU local softirq work is pending, handler #20!!!
-
-The IRQ_POLL_SOFTIRQ vector can be raised during the hotplug cpu_down()
-path after ksoftirqd is parked and before the CPU actually dies. However
-this is handled afterward at the CPUHP_IRQ_POLL_DEAD stage where the
-queue gets migrated.
-
-Hence this warning can be considered spurious and the vector can join
-the "hotplug-safe" list.
-
-Reported-and-tested-by: Paul Menzel <pmenzel@molgen.mpg.de>
-Signed-off-by: Frederic Weisbecker <frederic@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Paul E. McKenney <paulmck@kernel.org>
-Cc: Paul Menzel <pmenzel@molgen.mpg.de>
----
- include/linux/interrupt.h | 11 +++++++----
- 1 file changed, 7 insertions(+), 4 deletions(-)
-
-diff --git a/include/linux/interrupt.h b/include/linux/interrupt.h
-index 9613326d2f8af1..f40754caaefa43 100644
---- a/include/linux/interrupt.h
-+++ b/include/linux/interrupt.h
-@@ -580,12 +580,15 @@ enum
- };
- 
- /*
-- * Ignoring the RCU vector after ksoftirqd is parked is fine
-- * because:
-- * 	1) rcutree_migrate_callbacks() takes care of the queue.
-+ * The following vectors can be safely ignored after ksoftirqd is parked:
-+ *
-+ * _ RCU:
-+ * 	1) rcutree_migrate_callbacks() migrates the queue.
-  * 	2) rcu_report_dead() reports the final quiescent states.
-+ *
-+ * _ IRQ_POLL: irq_poll_cpu_dead() migrates the queue
-  */
--#define SOFTIRQ_HOTPLUG_SAFE_MASK (BIT(RCU_SOFTIRQ))
-+#define SOFTIRQ_HOTPLUG_SAFE_MASK (BIT(RCU_SOFTIRQ) | BIT(IRQ_POLL_SOFTIRQ))
- 
- /* map softirq index to softirq name. update 'softirq_to_name' in
-  * kernel/softirq.c when adding a new softirq.
-
-From 2753466eb2227d33f26b10a3b65924c1b94217c7 Mon Sep 17 00:00:00 2001
-From: Olga Kornievskaia <kolga@netapp.com>
-Date: Wed, 16 Mar 2022 18:24:26 -0400
-Subject: [PATCH 7/8] NFSv4.1 provide mount option to toggle trunking discovery
-
-Introduce a new mount option -- trunkdiscovery,notrunkdiscovery -- to
-toggle whether or not the client will engage in actively discovery
-of trunking locations.
-
-v2 make notrunkdiscovery default
-
-Signed-off-by: Olga Kornievskaia <kolga@netapp.com>
-Cherry-picked-for: https://bugs.archlinux.org/task/74272
----
- fs/nfs/client.c           | 3 ++-
- fs/nfs/fs_context.c       | 8 ++++++++
- include/linux/nfs_fs_sb.h | 1 +
- 3 files changed, 11 insertions(+), 1 deletion(-)
-
-diff --git a/fs/nfs/client.c b/fs/nfs/client.c
-index d1f34229e11ab5..e828504cc396c9 100644
---- a/fs/nfs/client.c
-+++ b/fs/nfs/client.c
-@@ -857,7 +857,8 @@ static int nfs_probe_fsinfo(struct nfs_server *server, struct nfs_fh *mntfh, str
- 	}
- 
- 	if (clp->rpc_ops->discover_trunking != NULL &&
--			(server->caps & NFS_CAP_FS_LOCATIONS)) {
-+			(server->caps & NFS_CAP_FS_LOCATIONS &&
-+			 (server->flags & NFS_MOUNT_TRUNK_DISCOVERY))) {
- 		error = clp->rpc_ops->discover_trunking(server, mntfh);
- 		if (error < 0)
- 			return error;
-diff --git a/fs/nfs/fs_context.c b/fs/nfs/fs_context.c
-index ea17fa1f31ecb0..e2d59bb5e6bbe7 100644
---- a/fs/nfs/fs_context.c
-+++ b/fs/nfs/fs_context.c
-@@ -80,6 +80,7 @@ enum nfs_param {
- 	Opt_source,
- 	Opt_tcp,
- 	Opt_timeo,
-+	Opt_trunkdiscovery,
- 	Opt_udp,
- 	Opt_v,
- 	Opt_vers,
-@@ -180,6 +181,7 @@ static const struct fs_parameter_spec nfs_fs_parameters[] = {
- 	fsparam_string("source",	Opt_source),
- 	fsparam_flag  ("tcp",		Opt_tcp),
- 	fsparam_u32   ("timeo",		Opt_timeo),
-+	fsparam_flag_no("trunkdiscovery", Opt_trunkdiscovery),
- 	fsparam_flag  ("udp",		Opt_udp),
- 	fsparam_flag  ("v2",		Opt_v),
- 	fsparam_flag  ("v3",		Opt_v),
-@@ -529,6 +531,12 @@ static int nfs_fs_context_parse_param(struct fs_context *fc,
- 		else
- 			ctx->flags &= ~NFS_MOUNT_NOCTO;
- 		break;
-+	case Opt_trunkdiscovery:
-+		if (result.negated)
-+			ctx->flags &= ~NFS_MOUNT_TRUNK_DISCOVERY;
-+		else
-+			ctx->flags |= NFS_MOUNT_TRUNK_DISCOVERY;
-+		break;
- 	case Opt_ac:
- 		if (result.negated)
- 			ctx->flags |= NFS_MOUNT_NOAC;
-diff --git a/include/linux/nfs_fs_sb.h b/include/linux/nfs_fs_sb.h
-index ca0959e51e817c..b0e3fd550122c4 100644
---- a/include/linux/nfs_fs_sb.h
-+++ b/include/linux/nfs_fs_sb.h
-@@ -151,6 +151,7 @@ struct nfs_server {
- #define NFS_MOUNT_SOFTREVAL		0x800000
- #define NFS_MOUNT_WRITE_EAGER		0x01000000
- #define NFS_MOUNT_WRITE_WAIT		0x02000000
-+#define NFS_MOUNT_TRUNK_DISCOVERY	0x04000000
- 
- 	unsigned int		fattr_valid;	/* Valid attributes */
- 	unsigned int		caps;		/* server capabilities */
-
-From c3292a89a2b8e3d3be2e2a3340e64cab80f58b66 Mon Sep 17 00:00:00 2001
+From 92f34a766fa83233da8174528763fb31bc8f1d8f Mon Sep 17 00:00:00 2001
 From: "Jan Alexander Steffens (heftig)" <heftig@archlinux.org>
-Date: Mon, 16 May 2022 22:44:40 +0200
-Subject: [PATCH 8/8] Arch Linux kernel v5.17.8-arch1
+Date: Mon, 30 May 2022 19:50:38 +0200
+Subject: [PATCH 2/2] Arch Linux kernel v5.18.1-arch1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 3cf179812f0f9b..944b2333a169af 100644
+index 2bb168acb8f433..d3cfcad35f7213 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 5
- PATCHLEVEL = 17
- SUBLEVEL = 8
+ PATCHLEVEL = 18
+ SUBLEVEL = 1
 -EXTRAVERSION =
 +EXTRAVERSION = -arch1
  NAME = Superb Owl
