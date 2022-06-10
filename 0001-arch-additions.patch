@@ -1,4 +1,4 @@
-From 6b212353b9dd9da3c9ff4272ca951d97fb6b10b4 Mon Sep 17 00:00:00 2001
+From fd747e1b48c1e61aafa6f17fbc50d68988a96a3e Mon Sep 17 00:00:00 2001
 From: "Jan Alexander Steffens (heftig)" <jan.steffens@gmail.com>
 Date: Mon, 16 Sep 2019 04:53:20 +0200
 Subject: [PATCH 1/2] ZEN: Add sysctl and CONFIG to disallow unprivileged
@@ -150,23 +150,23 @@ index 5481ba44a8d684..423ab2563ad757 100644
  static DEFINE_MUTEX(userns_state_mutex);
  
 
-From 92f34a766fa83233da8174528763fb31bc8f1d8f Mon Sep 17 00:00:00 2001
+From 5e014b6b80bbb0d6e3e5b88af796a72a346664c1 Mon Sep 17 00:00:00 2001
 From: "Jan Alexander Steffens (heftig)" <heftig@archlinux.org>
-Date: Mon, 30 May 2022 19:50:38 +0200
-Subject: [PATCH 2/2] Arch Linux kernel v5.18.1-arch1
+Date: Mon, 6 Jun 2022 21:56:34 +0200
+Subject: [PATCH 2/2] Arch Linux kernel v5.18.2-arch1
 
 ---
  Makefile | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 2bb168acb8f433..d3cfcad35f7213 100644
+index 6b1d606a92f6f2..9108f374e685cd 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 5
  PATCHLEVEL = 18
- SUBLEVEL = 1
+ SUBLEVEL = 2
 -EXTRAVERSION =
 +EXTRAVERSION = -arch1
  NAME = Superb Owl

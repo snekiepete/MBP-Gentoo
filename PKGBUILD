@@ -4,7 +4,7 @@
 #               apple-ibridge drivers, respectively.
 
 pkgbase=linux-t2
-pkgver=5.18.1
+pkgver=5.18.2
 _srcname=linux-${pkgver}
 pkgrel=1
 pkgdesc='Linux kernel for T2 Macs'
@@ -109,7 +109,7 @@ prepare() {
 build() {
   cd $_srcname
   make all
-  #make htmldocs
+  make htmldocs
 }
 
 _package() {
@@ -243,7 +243,7 @@ _package-docs() {
   ln -sr "$builddir/Documentation" "$pkgdir/usr/share/doc/$pkgbase"
 }
 
-pkgname=("$pkgbase" "$pkgbase-headers") #"$pkgbase-docs")
+pkgname=("$pkgbase" "$pkgbase-headers" "$pkgbase-docs")
 for _p in "${pkgname[@]}"; do
   eval "package_$_p() {
     $(declare -f "_package${_p#$pkgbase}")
@@ -251,10 +251,10 @@ for _p in "${pkgname[@]}"; do
   }"
 done
 
-sha256sums=('83d14126c660186a7a1774a4a5c29d38e170fa5e52cfd2d08fd344dcf1f57d22'
+sha256sums=('ef9ff2dfa5416a03e7e5fd9c308aaec385fe8ff9f4a62d957b167843849659a2'
             'SKIP'
             '5e34f17f45b3623bd8350b4d2c23ad7525b75c327cc49ec3dc37e3ee168d2f46'
-            '92324c8853b442485ad0caece8f3ee6c736e5dfc8aecc9b7e38fed515fbd08bf'
+            '736d70bff62a3bb7837cbdb0c546ec22bfba4f2bc355ded917f243db8be2e237'
             'SKIP'
             'SKIP'
             'b7c987889d92a48d638d5258842b10f6c856e57f29ad23475aa507c7b4ad5710'

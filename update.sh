@@ -24,8 +24,8 @@ UPSTREAM_HASH=$(curl -s "https://git.kernel.org/pub/scm/linux/kernel/git/$UPSTRE
 curl -s https://github.com/torvalds/linux/compare/v${BASE_VER}...AsahiLinux:$ASAHI_WIFI_BRANCH.patch > 8001-asahilinux-wifi-patchset.patch
 curl -s https://github.com/archlinux/linux/compare/$UPSTREAM_HASH...archlinux:v$VER-arch1.patch > 0001-arch-additions.patch
 
-curl -s https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/linux/trunk/PKGBUILD > PKGBUILD.orig
-curl -s https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/linux/trunk/config > config
+curl -s https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/linux/repos/core-x86_64/PKGBUILD > PKGBUILD.orig
+curl -s https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/linux/repos/core-x86_64/config > config
 
 
 sed -i s/pkgrel=./pkgrel=1/ PKGBUILD
