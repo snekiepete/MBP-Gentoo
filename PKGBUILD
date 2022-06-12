@@ -4,7 +4,7 @@
 #               apple-ibridge drivers, respectively.
 
 pkgbase=linux-t2
-pkgver=5.18.2
+pkgver=5.18.3
 _srcname=linux-${pkgver}
 pkgrel=1
 pkgdesc='Linux kernel for T2 Macs'
@@ -58,10 +58,6 @@ source=(
   # Broadcom WIFI device support
   # https://github.com/AsahiLinux/linux/commits/bits/080-wifi
   8001-asahilinux-wifi-patchset.patch
-
-  # do not make the t2 angry with some kernel configs
-  9001-efi-Do-not-import-certificates-from-UEFI-Secure-Boot.patch
-
 )
 
 validpgpkeys=(
@@ -251,10 +247,10 @@ for _p in "${pkgname[@]}"; do
   }"
 done
 
-sha256sums=('ef9ff2dfa5416a03e7e5fd9c308aaec385fe8ff9f4a62d957b167843849659a2'
+sha256sums=('c70cb405076c3cfd73e4de729430b0342ea21b92a04d8284a03fac664ef1cfea'
             'SKIP'
-            '5e34f17f45b3623bd8350b4d2c23ad7525b75c327cc49ec3dc37e3ee168d2f46'
-            '736d70bff62a3bb7837cbdb0c546ec22bfba4f2bc355ded917f243db8be2e237'
+            '9f4fda38f1c59f7a20a76eff48a0cb302cb0e8e55bda53ec0f1807e10dcdad3a'
+            'd83b419dab2f8e4619df7dae4619f22276d305cb0996a72b74c74ba14a65ae51'
             'SKIP'
             'SKIP'
             'b7c987889d92a48d638d5258842b10f6c856e57f29ad23475aa507c7b4ad5710'
@@ -270,6 +266,5 @@ sha256sums=('ef9ff2dfa5416a03e7e5fd9c308aaec385fe8ff9f4a62d957b167843849659a2'
             'b1f19084e9a9843dd8c457c55a8ea8319428428657d5363d35df64fb865a4eae'
             '92e6f4173074ac902c3fc397ea39a5ff6d5eb8645539645c0cd61b3d05ac83ca'
             '9ede98eceb69e9c93e25fdb2c567466963bdd2f81c0ecb9fb9e5107f6142ff26'
-            '7f4c83883e74d08c5282c350470661f1d30743479650974d7554625e01fe237e'
-            '9c66c30e5312922918d92411d4698291071a9f7b6be6a54f19fc74a31e3cfca4')
+            '7f4c83883e74d08c5282c350470661f1d30743479650974d7554625e01fe237e')
 # vim:set ts=8 sts=2 sw=2 et:
