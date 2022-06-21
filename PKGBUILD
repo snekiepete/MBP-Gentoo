@@ -4,7 +4,7 @@
 #               apple-ibridge drivers, respectively.
 
 pkgbase=linux-t2
-pkgver=5.18.3
+pkgver=5.18.5
 _srcname=linux-${pkgver}
 pkgrel=1
 pkgdesc='Linux kernel for T2 Macs'
@@ -59,7 +59,6 @@ source=(
   # https://github.com/AsahiLinux/linux/commits/bits/080-wifi
   8001-asahilinux-wifi-patchset.patch
 )
-
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
   '647F28654894E3BD457199BE38DBBDC86092693E'  # Greg Kroah-Hartman
@@ -247,10 +246,10 @@ for _p in "${pkgname[@]}"; do
   }"
 done
 
-sha256sums=('c70cb405076c3cfd73e4de729430b0342ea21b92a04d8284a03fac664ef1cfea'
+sha256sums=('9c3731d405994f9cd3a1bb72e83140735831b19c7cec18e0d7a8f3046fa034e7'
             'SKIP'
-            '9f4fda38f1c59f7a20a76eff48a0cb302cb0e8e55bda53ec0f1807e10dcdad3a'
-            'd83b419dab2f8e4619df7dae4619f22276d305cb0996a72b74c74ba14a65ae51'
+            'ee1f138da9c39bc2510f25cd7bfc00edaa6e418b35e52ce7f8392135e51068b9'
+            '2a7963c7335cd4b4b16c18af6931bf08cc367a2a7ebd8ec971863634a1a00070'
             'SKIP'
             'SKIP'
             'b7c987889d92a48d638d5258842b10f6c856e57f29ad23475aa507c7b4ad5710'
