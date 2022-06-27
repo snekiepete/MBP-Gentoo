@@ -4,7 +4,7 @@
 #               apple-ibridge drivers, respectively.
 
 pkgbase=linux-t2
-pkgver=5.18.5
+pkgver=5.18.7
 _srcname=linux-${pkgver}
 pkgrel=1
 pkgdesc='Linux kernel for T2 Macs'
@@ -103,8 +103,7 @@ prepare() {
 
 build() {
   cd $_srcname
-  make all
-  make htmldocs
+  make htmldocs all
 }
 
 _package() {
@@ -246,10 +245,10 @@ for _p in "${pkgname[@]}"; do
   }"
 done
 
-sha256sums=('9c3731d405994f9cd3a1bb72e83140735831b19c7cec18e0d7a8f3046fa034e7'
+sha256sums=('a1a2d064bf5a1f02021f66931237ec3d2920994d49910d27d3fe581e2e21525b'
             'SKIP'
-            'ee1f138da9c39bc2510f25cd7bfc00edaa6e418b35e52ce7f8392135e51068b9'
-            '2a7963c7335cd4b4b16c18af6931bf08cc367a2a7ebd8ec971863634a1a00070'
+            '382aa201a6a6939210dd8668ab052724547b4bd489b38e97502bbd0848061b35'
+            '55a7f59d67851c7e074f9bbfa362a568250cc7fe9b3dbe547306ddee6facd0ed'
             'SKIP'
             'SKIP'
             'b7c987889d92a48d638d5258842b10f6c856e57f29ad23475aa507c7b4ad5710'
@@ -265,5 +264,5 @@ sha256sums=('9c3731d405994f9cd3a1bb72e83140735831b19c7cec18e0d7a8f3046fa034e7'
             'b1f19084e9a9843dd8c457c55a8ea8319428428657d5363d35df64fb865a4eae'
             '92e6f4173074ac902c3fc397ea39a5ff6d5eb8645539645c0cd61b3d05ac83ca'
             '9ede98eceb69e9c93e25fdb2c567466963bdd2f81c0ecb9fb9e5107f6142ff26'
-            '7f4c83883e74d08c5282c350470661f1d30743479650974d7554625e01fe237e')
+            'f307d149ac9a48bbfd5ea678ff80457e31ae6f788ec8915f19f128d0bd966d65')
 # vim:set ts=8 sts=2 sw=2 et:
