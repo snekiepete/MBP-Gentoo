@@ -57,6 +57,11 @@ source=(
   # Broadcom WIFI device support
   # https://github.com/AsahiLinux/linux/commits/bits/080-wifi
   8001-asahilinux-wifi-patchset.patch
+
+  # Broadcom Bluetooth device support
+  # https://github.com/AsahiLinux/linux/tree/bluetooth-wip
+  9001-asahilinux-bluetooth-WIP.patch
+
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
@@ -94,6 +99,7 @@ prepare() {
   echo "Setting config..."
   cp ../config .config
   make olddefconfig
+  ./scripts/config --module CONFIG_BT_HCIBCM43XX
   diff -u ../config .config || :
 
   make -s kernelrelease > version
@@ -262,5 +268,6 @@ sha256sums=('ccd7110dad8dcc260e2891ea3c89bd4aaad0cbe2c055b1280147e76ece20f06c'
             'b1f19084e9a9843dd8c457c55a8ea8319428428657d5363d35df64fb865a4eae'
             '92e6f4173074ac902c3fc397ea39a5ff6d5eb8645539645c0cd61b3d05ac83ca'
             '9ede98eceb69e9c93e25fdb2c567466963bdd2f81c0ecb9fb9e5107f6142ff26'
-            '86b36a173e3608b844ed37dbe909f61b9a1aa593321cd45a5d08e91fe0e809fc')
+            '86b36a173e3608b844ed37dbe909f61b9a1aa593321cd45a5d08e91fe0e809fc'
+            '7fefea321a8bb61495976503bee8c8e0f98dc74e5770ba93086d24419908543d')
 # vim:set ts=8 sts=2 sw=2 et:
