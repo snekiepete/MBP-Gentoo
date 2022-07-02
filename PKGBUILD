@@ -4,8 +4,8 @@
 #               apple-ibridge drivers, respectively.
 
 pkgbase=linux-t2
-pkgver=5.18.7
-_srcname=linux-${pkgver}
+pkgver=5.19.rc4
+_srcname=$(echo linux-${pkgver} | sed -e s/\.rc/-rc/)
 pkgrel=1
 pkgdesc='Linux kernel for T2 Macs'
 _srctag=v${pkgver%.*}-${pkgver##*.}
@@ -20,8 +20,7 @@ makedepends=(
 options=('!strip')
 
 source=(
-  https://www.kernel.org/pub/linux/kernel/v${pkgver//.*}.x/linux-${pkgver}.tar.xz
-  https://www.kernel.org/pub/linux/kernel/v${pkgver//.*}.x/linux-${pkgver}.tar.sign
+  https://git.kernel.org/torvalds/t/linux-5.19-rc4.tar.gz
   config         # the main kernel config file
 
   # Arch Linux patches
@@ -245,13 +244,12 @@ for _p in "${pkgname[@]}"; do
   }"
 done
 
-sha256sums=('a1a2d064bf5a1f02021f66931237ec3d2920994d49910d27d3fe581e2e21525b'
-            'SKIP'
+sha256sums=('ccd7110dad8dcc260e2891ea3c89bd4aaad0cbe2c055b1280147e76ece20f06c'
             '382aa201a6a6939210dd8668ab052724547b4bd489b38e97502bbd0848061b35'
-            '55a7f59d67851c7e074f9bbfa362a568250cc7fe9b3dbe547306ddee6facd0ed'
+            '152fc6cc5cd6ddff14b03eefe4810743f33b9f907da9f88252d43fae58a53c90'
             'SKIP'
             'SKIP'
-            'b7c987889d92a48d638d5258842b10f6c856e57f29ad23475aa507c7b4ad5710'
+            'de6bb60597cff6179e1a2c407d6fa541f29454e4dbd97756724bfe7a9e68f31e'
             'a3a43feaffccbcd119f4a1b4e1299ef07ae36ef9bffc17767bf10e447fa02a2a'
             '45b911e592dd6c717e77ec4d8cbf844860bb7c29ace7a7170e7bf59c12e91bb4'
             'cfd23a06797ac86575044428a393dd7f10f06eff7648d0b78aedad82cbe41279'
@@ -264,5 +262,5 @@ sha256sums=('a1a2d064bf5a1f02021f66931237ec3d2920994d49910d27d3fe581e2e21525b'
             'b1f19084e9a9843dd8c457c55a8ea8319428428657d5363d35df64fb865a4eae'
             '92e6f4173074ac902c3fc397ea39a5ff6d5eb8645539645c0cd61b3d05ac83ca'
             '9ede98eceb69e9c93e25fdb2c567466963bdd2f81c0ecb9fb9e5107f6142ff26'
-            'f307d149ac9a48bbfd5ea678ff80457e31ae6f788ec8915f19f128d0bd966d65')
+            '86b36a173e3608b844ed37dbe909f61b9a1aa593321cd45a5d08e91fe0e809fc')
 # vim:set ts=8 sts=2 sw=2 et:
