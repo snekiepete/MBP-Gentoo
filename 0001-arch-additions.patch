@@ -270,8 +270,8 @@ index 323032d60ac34d..01df8326c443cb 100644
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 5
- PATCHLEVEL = 18
- SUBLEVEL = 14
+ PATCHLEVEL = 19
+ SUBLEVEL = 0
 -EXTRAVERSION = -gentoo
 +EXTRAVERSION = -t2gentoo
  NAME = Superb Owl
